@@ -5,12 +5,14 @@ class Table
     private $masker;
     private $tableName;
     private $tableFields;
+    private $customMasks;
 
     public function __construct(Masker $masker, $tableName, $tableFields)
     {
         $this->masker = $masker;
         $this->tableName = $tableName;
         $this->tableFields = $tableFields;
+        $this->customMasks = $masker->getCustomMasks();
     }
 
     public function getRule()
@@ -65,6 +67,11 @@ class Table
 
     private function getMaskForField($fieldName)
     {
+        if (!empty($this->customMasks[$fieldName]))
+        {
+            return $this->customMasks[$fieldName];
+        }
+        
         return 'CONCAT(LEFT(`' . $fieldName . '`,2), REPEAT(\'x\',LENGTH(`' . $fieldName . '`)-4), RIGHT(`' . $fieldName . '`, 2)) as `' . $fieldName . '`';
     }
 

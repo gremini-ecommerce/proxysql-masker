@@ -4,6 +4,7 @@ class Masker
 {
     private $cliOptions;
     private $fieldsToBeMasked = [];
+    private $customMasks = [];
     private $db;
 
     public function __construct($cliOptions)
@@ -30,11 +31,27 @@ class Masker
         }
 
         $this->fieldsToBeMasked = file($fieldsFilePath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+
+        foreach ($this->fieldsToBeMasked as &$field)
+        {
+            $fieldWithRule = explode(':', $field);
+            if (count($fieldWithRule) > 1)
+            {
+                $field = $fieldWithRule[0];
+                $this->customMasks[$field] = $fieldWithRule[1];
+            }
+        }
+
     }
 
     public function getFieldsToBeMasked()
     {
         return $this->fieldsToBeMasked;
+    }
+
+    public function getCustomMasks()
+    {
+        return $this->customMasks;
     }
 
     public function getRules()
