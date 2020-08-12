@@ -33,7 +33,7 @@ class Table
             return '';
         }
 
-        $tableMask = $this->getMask($fieldsNeedMasking);
+        $tableMask = $this->getMask($fieldsNeedMasking, $customMasks);
         $proxySqlUser = $masker->getProxySqlUser();
 
         $rule = 'INSERT INTO mysql_query_rules (username, schemaname, match_pattern, replace_pattern, re_modifiers, active) ';
@@ -42,7 +42,7 @@ class Table
         return $rule;
     }
 
-    private function getMask($fieldsNeedMasking)
+    private function getMask($fieldsNeedMasking, $customMasks)
     {
         $masks = [];
 
