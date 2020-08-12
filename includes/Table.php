@@ -2,22 +2,21 @@
 
 class Table
 {
-    private $masker;
+    private $dbName;
     private $tableName;
     private $tableFields;
-    private $customMasks;
 
-    public function __construct(Masker $masker, $tableName, $tableFields)
+    public function __construct($dbName, $tableName, $tableFields)
     {
-        $this->masker = $masker;
+        $this->dbName = $dbName;
         $this->tableName = $tableName;
         $this->tableFields = $tableFields;
-        $this->customMasks = $masker->getCustomMasks();
     }
 
-    public function getRule()
+    public function getRule(Masker $masker)
     {
-        $fieldsToBeMasked = $this->masker->getFieldsToBeMasked();
+        $customMasks = $masker->getCustomMasks();
+        $fieldsToBeMasked = $masker->getFieldsToBeMasked();
 
         $fieldsNeedMasking = [];
 
@@ -35,10 +34,10 @@ class Table
         }
 
         $tableMask = $this->getMask($fieldsNeedMasking);
-        $proxySqlUser = $this->masker->getProxySqlUser();
+        $proxySqlUser = $masker->getProxySqlUser();
 
         $rule = 'INSERT INTO mysql_query_rules (username, schemaname, match_pattern, replace_pattern, re_modifiers, active) ';
-        $rule .= 'VALUES ("' . $proxySqlUser . '", "' . $this->masker->getDbName() . '", "\* FROM `' . $this->tableName . '`", "' . $tableMask . '", "caseless,global", 1);';
+        $rule .= 'VALUES ("' . $proxySqlUser . '", "' . $this->dbName . '", "\* FROM `' . $this->tableName . '`", "' . $tableMask . '", "caseless,global", 1);';
 
         return $rule;
     }
@@ -49,7 +48,7 @@ class Table
 
         foreach ($fieldsNeedMasking as $fieldName)
         {
-            $masks[$fieldName] = $this->getMaskForField($fieldName);
+            $masks[$fieldName] = $this->getMaskForField($fieldName, $customMasks);
         }
 
         $tableFields = $this->tableFields;
@@ -65,13 +64,13 @@ class Table
         return implode(', ', $tableFields) . ' FROM `' . $this->tableName . '`';
     }
 
-    private function getMaskForField($fieldName)
+    private function getMaskForField($fieldName, $customMasks)
     {
-        if (!empty($this->customMasks[$fieldName]))
+        if (!empty($customMasks[$fieldName]))
         {
-            return $this->customMasks[$fieldName];
+            return $customMasks[$fieldName];
         }
-        
+
         return 'CONCAT(LEFT(`' . $fieldName . '`,2), REPEAT(\'x\',LENGTH(`' . $fieldName . '`)-4), RIGHT(`' . $fieldName . '`, 2)) as `' . $fieldName . '`';
     }
 

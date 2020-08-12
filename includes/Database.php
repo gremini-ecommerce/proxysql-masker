@@ -57,21 +57,38 @@ class Database
         return $dsnString;
     }
 
-    public function getTables()
+    public function getTables($dbName)
     {
+        $this->pdo->query('USE ' . $dbName);
+
         $tables = [];
 
         foreach ($this->pdo->query('SHOW TABLES') as $row)
         {
             $tableName = $row[0];
-            $tables[$tableName] = [];
+            $tableFields = [];
             foreach ($this->pdo->query('DESCRIBE `' . $tableName . '`') as $column)
             {
-                $tables[$tableName][] = $column['Field'];
+                $tableFields[] = $column['Field'];
             }
+            $tables[] = new Table($dbName, $tableName, $tableFields);
         }
 
+
         return $tables;
+    }
+
+    public function getDatabases()
+    {
+        $databases = [];
+
+        foreach ($this->pdo->query('SHOW DATABASES') as $row)
+        {
+            $databases[] = $row[0];
+        }
+
+        return $databases;
+
     }
 
 }

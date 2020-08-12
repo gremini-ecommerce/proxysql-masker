@@ -56,14 +56,24 @@ class Masker
 
     public function getRules()
     {
-        $tables = $this->db->getTables();
-        foreach ($tables as $tableName => $tableFields)
+        $databases = [];
+        $databases[] = $this->cliOptions['d'];
+
+        if (empty($this->cliOptions['d']))
         {
-            $table = new Table($this, $tableName, $tableFields);
-            $rule = $table->getRule();
-            if (!empty($rule))
+            $databases = $this->db->getDatabases();
+        }
+
+        foreach ($databases as $dbName)
+        {
+            $tables = $this->db->getTables($dbName);
+            foreach ($tables as $table)
             {
-                echo $rule . "\n";
+                $rule = $table->getRule($this);
+                if (!empty($rule))
+                {
+                    echo $rule . "\n";
+                }
             }
         }
 
