@@ -9,6 +9,6 @@ function printHelp()
     echo "-h: MySql host. Defaults to 127.0.0.1.\n";
     echo "-P: MySql port. Defaults to 3306.\n";
     echo "-s: MySql unix socket.\n";
-    echo "-f file: should be a text file with fields that need masking, one per row.\n";
+    echo "-f file: should be a text file with fields that need masking, one per row. See the README for using custom masks.\n";
     echo "-U user: the Proxy SQL user that will be inserted into mysql_query_rules.\n";
 }
